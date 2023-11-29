@@ -1,0 +1,44 @@
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - "./mysql/conf:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/init:/docker-entrypoint-initdb.d"
+    networks:
+      - lin
+  lin_bankend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: lin_bankend
+    ports:
+      - "3000:3000"
+    networks:
+      - lin
+    depends_on:
+      - mysql
+
+  # nginx部署
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - "/root/nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "/root/nginx:/usr/share/nginx/html"
+    networks:
+      - lin
+    depends_on:
+      - lin_bankend
+
+networks:
+  lin:
+    name: lin
