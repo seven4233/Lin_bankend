@@ -79,6 +79,8 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   avatar(@UploadedFile() file:any, @Req() req,) {
 
+    console.log(11);
+    
     const userId = req.currentUser?.id;
     return this.userService.updateAvatar(file, userId);
   }

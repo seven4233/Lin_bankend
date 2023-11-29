@@ -13,7 +13,7 @@ import { Level } from './entities/level.entity';
 import { UserLevel } from './entities/user_level.entity';
 import randomName from 'src/utils/name';
 import { Notify } from './entities/notify.entity';
-
+import {cos} from 'src/utils/cos'
 let code: string;
 @Injectable()
 export class UserService {
@@ -314,7 +314,6 @@ export class UserService {
     let userToUpdate = await this.user.findOne({ where: { id: userId } });
     // 获取已做题总数
     let res = await this.user.save({ ...userToUpdate, ...userInfo });
-
     
     const totalDone = await this.uq.count({ where: { user_id: userId } });
     return {
@@ -328,44 +327,30 @@ export class UserService {
    * 更新头像
    */
   async updateAvatar(file: any, userId: number) {
-    // getToken
-    const mac = new qiniu.auth.digest.Mac(process.env.AK, process.env.SK);
-    const putPolicy = new qiniu.rs.PutPolicy({ scope: process.env.scope });
-    const uploadToken = putPolicy.uploadToken(mac);
-
+    console.log(file);
     
-    //upload
-    const formUploader = new qiniu.form_up.FormUploader(
-      new qiniu.conf.Config({ zone: qiniu.zone.Zone_z1 }),
-    );
+    let res:string = await new Promise((resolve, reject) => {
+      cos.putObject({
+        Bucket: 'hualin-1314589919', /* 必须 */
+        Region: 'ap-beijing',    /* 必须 */
+        Key: file.originalname ,              /* 必须 */
+        StorageClass: 'STANDARD',
+        Body: file.buffer, // 上传文件对象
+        onProgress: function (progressData) {
+          // console.log(JSON.stringify(progressData));
+        }
+      }, function (err, data) {
+        if(err){console.log(err);
+        }
+        resolve('https://'+ data?.Location)
+      })
+    })
+    const userToUpdate = await this.user.findOne({where:{id : userId}})
+    userToUpdate.avatar = res
+    await this.user.save(userToUpdate)
+ 
+    return { message: '头像上传成功!', code: 0, result: res};
 
-    let avatarInfo: any = await new Promise((resolve, reject) => {
-      formUploader.put(
-        uploadToken,
-        `${Date.now()}-${file.originalname}`,
-        file.buffer,
-        new qiniu.form_up.PutExtra(),
-        function (err, body, result) {
-
-          if (err) {
-            return { code: -1, message: err.message };
-          }
-          if (result.statusCode === 200) {
-            resolve({
-              url: new URL(body.key, 'https://cdn.huashui666.com/').href,
-            });
-          }
-        },
-      );
-    });
-    
-
-    //update
-    let userToUpdate = await this.user.findOne({ where: { id: userId } });
-    userToUpdate.avatar = avatarInfo.url;
-
-    let res = await this.user.save(userToUpdate);
-    return { message: '头像上传成功!', code: 0, result: res };
   }
 
   /**
