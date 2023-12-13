@@ -333,9 +333,9 @@ export class UserService {
       cos.putObject({
         Bucket: 'hualin-1314589919', /* 必须 */
         Region: 'ap-beijing',    /* 必须 */
-        Key: file.originalname ,              /* 必须 */
+        Key: file?.originalname ,              /* 必须 */
         StorageClass: 'STANDARD',
-        Body: file.buffer, // 上传文件对象
+        Body: file?.buffer, // 上传文件对象
         onProgress: function (progressData) {
           // console.log(JSON.stringify(progressData));
         }

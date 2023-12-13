@@ -52,10 +52,8 @@ export class UserController {
   // 获取用户信息
   @Get('getUserInfo')
   getUserInfo(@Req() req, @Headers() header){
-    console.log(header);
     
     const userId = req.currentUser?.id
-    console.log(userId);
     
     return this.userService.queryUserInfo(userId)
   }
@@ -70,6 +68,7 @@ export class UserController {
   //更新用户信息的接口
   @Put('update')
   update(@Body() userInfo: UpdateUserDto, @Req() req) {
+    
     const userId = req.currentUser?.id;
     return this.userService.updateUserinfo(userInfo, userId);
   }
