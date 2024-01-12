@@ -224,6 +224,14 @@ export class QuestionService {
     return { code: 0, message: '提交成功!' }
   }
 
+  //浏览加1
+  async addFever(bankId: number){
+      let bankToUpdate = await this.bank.findOne({where:{id: bankId}})
+
+      bankToUpdate.fever += 1;
+      await  this.bank.save(bankToUpdate)
+      return {message:'浏览加一', code:0}
+  }
 }
 // 20 , 50 , 100 , 180, 300, 480, 680, 999, 1400
 const mapCountToLv = (count: number) => {

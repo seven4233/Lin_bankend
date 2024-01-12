@@ -50,4 +50,13 @@ export class QuestionController {
     return this.questionService.insertFinishedQuestion(body, userId)
   }
 
+  // 浏览加yi
+  @Get("/fever")
+  feverAddOne(@Query() query){
+    console.log(query)
+    const bankId = query?.bankId
+    return this.questionService.addFever(+bankId);
+  }
+
+
 }

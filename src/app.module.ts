@@ -6,9 +6,10 @@ import { DatabaseModule } from './database/database.module';
 import { UserModule } from './user/user.module';
 import { AuthMiddle } from './middleware/auth.middleware';
 import { AdminModule } from './admin/admin.module';
+import { FileModule } from './file/file.module';
 
 @Module({
-  imports: [QuestionModule, DatabaseModule, UserModule, AdminModule],
+  imports: [QuestionModule, DatabaseModule, UserModule, AdminModule, FileModule],
   controllers: [AppController],
   providers: [AppService],
 })
