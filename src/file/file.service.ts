@@ -9,7 +9,7 @@ export class FileService {
   constructor(@Inject("FILE") private file: Repository<File> ) {
   }
 
-  async create(file: any) {
+  async create(file: any, userId: number, fileInfo: any) {
     let res:string = await new Promise((resolve, reject) => {
       cos.putObject({
         Bucket: 'hualin-1314589919', /* 必须 */
@@ -26,13 +26,24 @@ export class FileService {
         resolve('https://'+ data?.Location)
       })
     })
-    console.log(res)
-    return {result: res , message:'上传文件成功'}
+
+    // 需要保存的文件信息
+    const fileToSave = {
+      name: fileInfo?.name,
+      size: file?.size,
+      type: fileInfo?.type,
+      url: res,
+      userId: userId
+    }
+
+    await this.file.save(fileToSave)
+
+    return {result: res , message:'上传文件成功', code: 0}
   }
 
   // 获取文件列表
   async findAll() {
-    const fileList = await this.file.find();
+    const fileList = await this.file.find({order: {createTime:'desc'}});
     return {result: fileList, message:'获取文件列表成功', code: 0}
   }
 
