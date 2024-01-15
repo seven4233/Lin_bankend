@@ -6,6 +6,7 @@ import { UserRole } from "./entities/user_role.entity";
 import { Level } from "./entities/level.entity";
 import { UserLevel } from "./entities/user_level.entity";
 import { Notify } from "./entities/notify.entity";
+import {History} from "./entities/history.entity";
 
 export const userProviders = [
     {
@@ -41,6 +42,12 @@ export const userProviders = [
     {
         provide:'NOTIFY_REPOSITORY',
         useFactory:(dataSource:DataSource)=> dataSource.getRepository(Notify),
+        inject:["DATA_SOURCE"]
+    },
+    // 搜索历史
+    {
+        provide:'HISTORY_REPOSITORY',
+        useFactory:(dataSource:DataSource)=> dataSource.getRepository(History),
         inject:["DATA_SOURCE"]
     }
 ]

@@ -4,7 +4,6 @@ import * as jwt from 'jsonwebtoken';
 import { User } from './entities/user.entity';
 import { UserQuestion } from './entities/user_question.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as qiniu from 'qiniu';
 import { Role } from './entities/role.entity';
 import { UserRole } from './entities/user_role.entity';
 import { client, createMobileParams } from 'src/utils/useMobile';
@@ -14,6 +13,8 @@ import { UserLevel } from './entities/user_level.entity';
 import randomName from 'src/utils/name';
 import { Notify } from './entities/notify.entity';
 import {cos} from 'src/utils/cos'
+import {History} from "./entities/history.entity";
+import {Single} from "../question/entities/single.entity";
 let code: string;
 @Injectable()
 export class UserService {
@@ -25,7 +26,43 @@ export class UserService {
     @Inject('LEVEL_REPOSITORY') private level: Repository<Level>,
     @Inject('USER_LEVEL_REPOSITORY') private ul: Repository<UserLevel>,
     @Inject('NOTIFY_REPOSITORY') private notify: Repository<Notify>,
+    @Inject('HISTORY_REPOSITORY') private history: Repository<History>,
+    @Inject('SINGLE_REPOSITORY') private single: Repository<Single>,
   ) {}
+
+
+  //添加搜索历史
+  async addHistory(keyword: string, userId:number ){
+    // 如果已存在，则不添加，而是覆盖
+    const isExist = await this.history.findOne({where:{keyword,userId}})
+    if(isExist){
+      await this.history.delete(isExist.id)
+      await this.history.save({keyword:keyword, userId:userId})
+    }else {
+      await  this.history.save({keyword:keyword, userId:userId})
+    }
+
+    // let searchRes = await this.single.find()
+    return {message: '添加搜索历史成功!', code:0}
+  }
+  //获取搜搜历史
+  async getHistory(userId:number){
+    let res = await this.history.find({where:{userId}, order:{createTime:'desc'}})
+    return {result: res, code :0, message:'获取搜索历史列表成功!'}
+  }
+
+  // 删除搜索历史
+  async deleteHistory(id:number){
+    let res = await this.history.softDelete(id)
+    return { code :0, message:'删除成功!'}
+  }
+
+
+  // 清空搜索历史
+  async clearHistoryService(userId:number){
+    let res = await this.history.softDelete({userId})
+    return { code :0, message:'清除成功!'}
+  }
 
   /**
    * 获取用户列表
@@ -415,4 +452,7 @@ export class UserService {
     const res = await this.notify.find()
     return {message:'获取通知列表成功', code:0 , result: res}
   }
+
+
+
 }

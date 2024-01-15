@@ -9,7 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Req,
-  ParseFilePipe
+  ParseFilePipe, Query
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -24,17 +24,27 @@ export class FileController {
   // 上传文件
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  create(@UploadedFile() file: any, @Req() req, @Body('info') info ) {
+  create(@UploadedFile() file: any, @Req() req, ) {
 
+    console.log(file)
+
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
     const userId = req.currentUser?.id
-    const fileInfo = JSON.parse(info)
-    return this.fileService.create(file, userId, fileInfo);
+    console.log(file)
+    return this.fileService.create(file, userId);
   }
 
   // 获取文件列表
   @Get()
   findAll() {
     return this.fileService.findAll();
+  }
+
+  // 搜索文件
+  @Get('search')
+  search(@Query("keyword") keyword:string) {
+    console.log(keyword)
+    return this.fileService.searchFile(keyword);
   }
 
   @Get(':id')

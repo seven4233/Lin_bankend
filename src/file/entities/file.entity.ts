@@ -26,7 +26,7 @@ export class File {
     type: string;
 
     //文件地址
-    @Column({ nullable: true })
+    @Column({ nullable: true, length: 1000 })
     url: string;
 
     //上传用户id
