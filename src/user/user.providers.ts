@@ -7,11 +7,17 @@ import { Level } from "./entities/level.entity";
 import { UserLevel } from "./entities/user_level.entity";
 import { Notify } from "./entities/notify.entity";
 import {History} from "./entities/history.entity";
+import {UserFavor} from "./entities/user_favor.entity";
 
 export const userProviders = [
     {
         provide:'USER_REPOSITORY',
         useFactory:(dataSource:DataSource)=> dataSource.getRepository(User),
+        inject:["DATA_SOURCE"]
+    },
+    {
+        provide:'USER_FAVOR_REPOSITORY',
+        useFactory:(dataSource:DataSource)=> dataSource.getRepository(UserFavor),
         inject:["DATA_SOURCE"]
     },
     {

@@ -171,4 +171,20 @@ export class UserController {
         return this.userService.clearHistoryService(userId)
     }
 
+//     添加收藏
+    @Post("favor")
+    addFavor(@Req() req:any, @Body() body:any){
+        const userId = req.currentUser?.id
+
+        return this.userService.addFavor(userId,body);
+    }
+
+//     获取收藏列表
+    @Get("favor")
+    getFavor(@Req() req:any ){
+        const userId = req.currentUser?.id
+        return this.userService.getFavorList(userId);
+    }
+
+
 }

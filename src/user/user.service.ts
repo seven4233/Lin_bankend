@@ -15,6 +15,7 @@ import { Notify } from './entities/notify.entity';
 import {cos} from 'src/utils/cos'
 import {History} from "./entities/history.entity";
 import {Single} from "../question/entities/single.entity";
+import {UserFavor} from "./entities/user_favor.entity";
 let code: string;
 @Injectable()
 export class UserService {
@@ -28,8 +29,29 @@ export class UserService {
     @Inject('NOTIFY_REPOSITORY') private notify: Repository<Notify>,
     @Inject('HISTORY_REPOSITORY') private history: Repository<History>,
     @Inject('SINGLE_REPOSITORY') private single: Repository<Single>,
+    @Inject('USER_FAVOR_REPOSITORY') private uf: Repository<UserFavor>,
   ) {}
 
+
+  //添加收藏
+  async addFavor( userId:number, item:any){
+    // 如果已存在，则不添加，而是取消
+    const isExist = await this.uf.findOne({where:{bank_id:item.bank_id, user_id:userId, question_sort:item.type, question_num:item.question_num}})
+    if(isExist){
+      await this.uf.delete(isExist.id)
+    }else {
+      // 添加
+      await  this.uf.save({bank_id: item.bank_id, user_id:userId, question_sort:item.type, question_num:item.question_num})
+    }
+    // let searchRes = await this.single.find()
+    return {message: '添加收藏!', code:0}
+  }
+
+  //获取收藏列表
+  async getFavorList(userId:number){
+    let res = await this.uf.find({where:{user_id:userId}, order:{createdAt:'desc'}})
+    return {result: res, code :0, message:'获取收藏列表成功!'}
+  }
 
   //添加搜索历史
   async addHistory(keyword: string, userId:number ){
