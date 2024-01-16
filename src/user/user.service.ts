@@ -50,7 +50,19 @@ export class UserService {
   //获取收藏列表
   async getFavorList(userId:number){
     let res = await this.uf.find({where:{user_id:userId}, order:{createdAt:'desc'}})
-    return {result: res, code :0, message:'获取收藏列表成功!'}
+    let result:any[] = []
+    // 根据不同的体型到不同的库中找
+    for (let i = 0; i < res.length; i++) {
+        let type = res[i].question_sort
+        switch (type){
+          case '单选题':
+           let item =  await this.single.findOne({where:{question_num:res[i].question_num, bank_id:res[i].bank_id}})
+            result.push(item)
+            break;
+        }
+    }
+
+    return {result, code :0, message:'获取收藏列表成功!'}
   }
 
   //添加搜索历史

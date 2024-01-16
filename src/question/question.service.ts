@@ -11,6 +11,7 @@ import { Blank } from './entities/blank.entity';
 import { Judge } from './entities/judge.entity';
 import { User } from 'src/user/entities/user.entity';
 import { UserLevel } from 'src/user/entities/user_level.entity';
+import {UserFavor} from "../user/entities/user_favor.entity";
 
 @Injectable()
 export class QuestionService {
@@ -23,6 +24,7 @@ export class QuestionService {
     @Inject('JUDGE_REPOSITORY') private judge: Repository<Judge>,
     @Inject('USER_REPOSITORY') private user: Repository<User>,
     @Inject('USER_LEVEL_REPOSITORY') private ul: Repository<UserLevel>,
+    @Inject('USER_FAVOR_REPOSITORY') private uf: Repository<UserFavor>,
     @Inject('USER_QUESTION_REPOSITORY') private uq: Repository<UserQuestion>) { }
 
   // 获取题库列表
@@ -66,6 +68,12 @@ export class QuestionService {
     const doneArr = doneList?.map(item => {
       return item.question_num
     })
+
+    // 寻找已收藏的 （单选）题
+    const favoredList = await this.uf.find({where:{user_id:userId, question_sort:'单选题'}})
+    const favoredArr = favoredList?.map(item=>{
+      return item.question_num
+    })
     const singleList = await this.single.find({
       take: 5,
       where: {
@@ -75,7 +83,12 @@ export class QuestionService {
     })
     // 加工选项
     const newSingleList = singleList.map((item, index) => {
-
+      let isFavored:boolean
+      if(favoredArr.includes(item.question_num)){
+        isFavored = true
+      }else{
+        isFavored = false
+      }
       const newOptions = item.options.split('$').map((i: any, idx: number) => {
         const letter = 'ABCD'
         return {
@@ -90,7 +103,8 @@ export class QuestionService {
       return {
         ...item,
         question_index: index,
-        options: newOptions
+        options: newOptions,
+        isFavored
       }
     })
 
