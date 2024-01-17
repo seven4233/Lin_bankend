@@ -16,6 +16,7 @@ import {cos} from 'src/utils/cos'
 import {History} from "./entities/history.entity";
 import {Single} from "../question/entities/single.entity";
 import {UserFavor} from "./entities/user_favor.entity";
+import {Bank} from "../question/entities/bank.entity";
 let code: string;
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
     @Inject('NOTIFY_REPOSITORY') private notify: Repository<Notify>,
     @Inject('HISTORY_REPOSITORY') private history: Repository<History>,
     @Inject('SINGLE_REPOSITORY') private single: Repository<Single>,
+    @Inject('BANK_REPOSITORY') private bank: Repository<Bank>,
     @Inject('USER_FAVOR_REPOSITORY') private uf: Repository<UserFavor>,
   ) {}
 
@@ -56,7 +58,9 @@ export class UserService {
         let type = res[i].question_sort
         switch (type){
           case '单选题':
-           let item =  await this.single.findOne({where:{question_num:res[i].question_num, bank_id:res[i].bank_id}})
+           let item =  await this.single.findOne({where:{question_num:res[i].question_num, bank_id:res[i].bank_id}});
+           let bankinfo = await this.bank.findOne({where:{id: item.bank_id}});
+           (item as any ).bank = bankinfo
             result.push(item)
             break;
         }
